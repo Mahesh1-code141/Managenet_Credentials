@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
-  namespace: userapp
+  namespace: mahesh
 spec:
   replicas: 1
   selector:
@@ -28,7 +28,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
-  namespace: userapp
+  namespace: mahesh
 spec:
   selector:
     app: mysql
@@ -42,7 +42,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myuserapp
-  namespace: userapp
+  namespace: mahesh
   labels:
     app: myuserapp
 spec:
@@ -78,7 +78,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: myuserapp-service
-  namespace: userapp
+  namespace: mahesh
 spec:
   selector:
     app: myuserapp
