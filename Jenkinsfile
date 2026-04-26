@@ -65,7 +65,7 @@ stage('SonarQube Analysis') {
 
     stage('Quality Gate') {
         steps {
-            timeout(time: 2, unit: 'MINUTES') {
+            timeout(time: 1, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: true
             }
         }
@@ -84,7 +84,7 @@ stage('SonarQube Analysis') {
         steps {
             withCredentials([usernamePassword(credentialsId: 'nexuscred', passwordVariable: 'passwd', usernameVariable: 'username')]) {
                 sh """
-                python3 -m twine upload --repository-url http://3.111.196.29:8081/repository/python/ \
+                python3 -m twine upload --repository-url http://65.0.122.247:8081/repository/python/ \
                 -u $username -p $passwd dist/*
                 """
             }
