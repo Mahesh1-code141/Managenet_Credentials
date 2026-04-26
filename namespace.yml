@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: userapp
+  name: mahesh
   labels:
-    app: userapp
+    app: mahesh
     managed-by: jenkins
