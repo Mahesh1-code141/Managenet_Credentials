@@ -16,6 +16,9 @@ environment {
     CAL_PORT          = '8087'
     SONARQUBE_ENV     = 'sq'
 }
+    tools {
+    sonarScanner 'sonar-scanner'
+}
 
 stages {
 
