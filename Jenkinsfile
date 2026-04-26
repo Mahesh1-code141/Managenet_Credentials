@@ -45,20 +45,20 @@ stages {
         }
     }
 
-    stage('Sonarqube Analysis') {
-        steps {
-            withSonarQubeEnv("${SONARQUBE_ENV}") {
-                sh """
-                   /opt/sonar-scanner\
-                  -Dsonar.projectKey=3-tier-user-management-app \
-                  -Dsonar.sources=. \
-                  -Dsonar.test.inclusions=test_*.py \
-                  -Dsonar.exclusions=venv/**,__pycache__/**,.dockerignore \
-                  -Dsonar.python.coverage.reportPaths=coverage.xml
-                """
-            }
+stage('Sonarqube Analysis') {
+    steps {
+        withSonarQubeEnv('sq') {
+            sh '''
+            sonar-scanner \
+            -Dsonar.projectKey=3-tier-user-management-app \
+            -Dsonar.sources=. \
+            -Dsonar.test.inclusions=test_*.py \
+            -Dsonar.exclusions=venv/**,__pycache__/**,.dockerignore \
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            '''
         }
     }
+}
 
     stage('Quality Gate') {
         steps {
