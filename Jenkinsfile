@@ -10,7 +10,7 @@ environment {
     TODO_LATEST       = "${DOCKERHUB_USER}/${TODO_REPO}:latest"
 
     GIT_REPO_URL      = 'https://github.com/sauravnirala/3-tier-user-management-app.git'
-    GIT_BRANCH        = 'master'
+    GIT_BRANCH        = 'main'
 
     K8S_NAMESPACE     = 'userapp'
     CAL_PORT          = '8087'
