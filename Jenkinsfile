@@ -32,6 +32,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
+                    python3 -m ensurepip || true
                     python3 -m pip install --upgrade pip
                     python3 -m pip install --user -r requirements.txt
                 '''
@@ -51,14 +52,17 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=3-tier-user-management-app \
-                        -Dsonar.sources=. \
-                        -Dsonar.test.inclusions=test_*.py \
-                        -Dsonar.exclusions=venv/**,__pycache__/**,.dockerignore \
-                        -Dsonar.python.coverage.reportPaths=coverage.xml
-                    '''
+                    script {
+                        def scannerHome = tool 'sonar-scanner'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=3-tier-user-management-app \
+                            -Dsonar.sources=. \
+                            -Dsonar.test.inclusions=test_*.py \
+                            -Dsonar.exclusions=venv/**,__pycache__/**,.dockerignore \
+                            -Dsonar.python.coverage.reportPaths=coverage.xml
+                        """
+                    }
                 }
             }
         }
@@ -100,7 +104,6 @@ pipeline {
             steps {
                 sh '''
                     docker build --no-cache -t $TODO_IMAGE -t $TODO_LATEST .
-                    echo "Built $TODO_IMAGE"
                 '''
             }
         }
@@ -139,7 +142,6 @@ pipeline {
                     kubectl apply -f namespace.yml
 
                     cp projectdeploy.yml /tmp/all-apps.yml
-
                     sed -i "s|sauravnirala/usermanagement:v1|$TODO_IMAGE|g" /tmp/all-apps.yml
 
                     kubectl apply -f /tmp/all-apps.yml
