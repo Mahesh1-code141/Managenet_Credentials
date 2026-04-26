@@ -12,7 +12,7 @@ environment {
     GIT_REPO_URL      = 'https://github.com/Mahesh1-code141/Managenet_Credentials.git'
     GIT_BRANCH        = 'main'
 
-    K8S_NAMESPACE     = 'userapp'
+    K8S_NAMESPACE     = 'mahesh'
     CAL_PORT          = '8087'
     SONARQUBE_ENV     = 'sq'
 }
@@ -49,7 +49,7 @@ stages {
         steps {
             withSonarQubeEnv("${SONARQUBE_ENV}") {
                 sh """
-                   /opt/sonar-scanner/bin/sonar-scanner \
+                   /opt/sonar-scanner\
                   -Dsonar.projectKey=3-tier-user-management-app \
                   -Dsonar.sources=. \
                   -Dsonar.test.inclusions=test_*.py \
