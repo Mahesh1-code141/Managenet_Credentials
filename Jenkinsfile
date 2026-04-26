@@ -49,7 +49,7 @@ stage('Sonarqube Analysis') {
     steps {
         withSonarQubeEnv('sq') {
             sh '''
-            sonar-scanner \
+            sq \
             -Dsonar.projectKey=3-tier-user-management-app \
             -Dsonar.sources=. \
             -Dsonar.test.inclusions=test_*.py \
