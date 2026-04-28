@@ -22,5 +22,5 @@ def fetch_user_by_id(user_id):
 def remove_user_by_id(user_id):
     delete_user_by_id(user_id)
 
-def show_all_data(user_id,name, email, address, phonenumber):
+def show_all_data():
     return get_all_users()
