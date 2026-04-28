@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from services.user_service import initialize_app_database, create_user, fetch_user_by_id, remove_user_by_id
+from services.user_service import initialize_app_database, create_user, fetch_user_by_id, remove_user_by_id, show_all_data
 import os
 
 app = Flask(__name__)
@@ -38,6 +38,11 @@ def get_data():
         return render_template('data.html', users=users, input_id=input_id)
 
     return render_template('get_data.html')
+
+@app.route('/show-all')
+def show_all():
+    users = show_all_data()
+    return render_template("showall.html", users=users)
 
 
 @app.route('/delete/<int:id>', methods=['GET', 'POST'])
