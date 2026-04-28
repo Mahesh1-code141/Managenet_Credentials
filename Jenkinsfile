@@ -141,7 +141,7 @@ stage('SonarQube Analysis') {
 
                 cp projectdeploy.yml /tmp/all-apps.yml
 
-                sed -i 's|mahesh2452/usermanagement:v1|${DOCKER_IMAGE}|g' /tmp/all-apps.yml
+                sed -i 's|mahesh2452/usermanagement:latest|${DOCKER_IMAGE}|g' /tmp/all-apps.yml
 
                 kubectl apply -f /tmp/all-apps.yml
                 kubectl rollout restart deployment myuserapp -n ${K8S_NAMESPACE}
