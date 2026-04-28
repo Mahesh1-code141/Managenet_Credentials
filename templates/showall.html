@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Users</title>
+    <style>
+        body{
+            font-family: Arial;
+            text-align:center;
+            background:#f7f7f7;
+        }
+
+        table{
+            width:80%;
+            margin:auto;
+            border-collapse:collapse;
+        }
+
+        th,td{
+            border:1px solid #ddd;
+            padding:10px;
+        }
+
+        th{
+            background:navy;
+            color:white;
+        }
+
+        a{
+            text-decoration:none;
+            color:blue;
+        }
+    </style>
+</head>
+<body>
+
+<h1>All Stored Users</h1>
+
+<table>
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Address</th>
+    <th>Phone</th>
+</tr>
+
+{% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>{{ user.name }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.address }}</td>
+    <td>{{ user.phonenumber }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<br>
+<a href="/">Back Home</a>
+
+</body>
+</html>
