@@ -39,7 +39,7 @@ def get_data():
 
     return render_template('get_data.html')
 
-@app.route('/show-all')
+@app.route('/show-all', method=['GET', 'POST'])
 def show_all():
     users = show_all_data()
     return render_template("showall.html", users=users)
