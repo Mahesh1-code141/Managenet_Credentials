@@ -84,7 +84,7 @@ stage('SonarQube Analysis') {
         steps {
             withCredentials([usernamePassword(credentialsId: 'nexuscred', passwordVariable: 'passwd', usernameVariable: 'username')]) {
                 sh """
-                python3 -m twine upload --repository-url http://43.204.230.76:8081/repository/python/ \
+                python3 -m twine upload --repository-url http://13.203.231.90:8081/repository/python/ \
                 -u $username -p $passwd dist/*
                 """
             }
