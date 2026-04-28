@@ -13,7 +13,6 @@ environment {
     GIT_BRANCH        = 'main'
 
     K8S_NAMESPACE     = 'mahesh'
-    CAL_PORT          = '8087'
     SONARQUBE_ENV     = 'sq'
 }
 
