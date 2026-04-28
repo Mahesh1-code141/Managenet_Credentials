@@ -41,7 +41,7 @@ def get_data():
 
 @app.route('/show-all', methods=['GET', 'POST'])
 def show_all():
-    users = show_all_data(user_id,name, email, address, phonenumber)
+    users = show_all_data()
     return render_template("showall.html", users=users)
 
 
