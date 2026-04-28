@@ -3,11 +3,11 @@ agent any
 
 environment {
     DOCKERHUB_USER    = 'mahesh2452'
-    TODO_REPO         = 'usermanagement'
+    DOCKER_REPO         = 'usermanagement'
     IMAGE_TAG         = "${env.BUILD_NUMBER}"
 
-    TODO_IMAGE        = "${DOCKERHUB_USER}/${TODO_REPO}:${IMAGE_TAG}"
-    TODO_LATEST       = "${DOCKERHUB_USER}/${TODO_REPO}:latest"
+    DOCKER_IMAGE        = "${DOCKERHUB_USER}/${DOCKER_REPO}:${IMAGE_TAG}"
+    DOCKER_LATEST       = "${DOCKERHUB_USER}/${DOCKER_REPO}:latest"
 
     GIT_REPO_URL      = 'https://github.com/Mahesh1-code141/Managenet_Credentials.git'
     GIT_BRANCH        = 'main'
@@ -94,8 +94,8 @@ stage('SonarQube Analysis') {
     stage('Build Docker Images') {
         steps {
             sh """
-                docker build --no-cache -t ${TODO_IMAGE} -t ${TODO_LATEST} -f Dockerfile .
-                echo "Built ${TODO_IMAGE}"
+                docker build --no-cache -t ${DOCKER_IMAGE} -t ${DOCKER_LATEST} -f Dockerfile .
+                echo "Built ${DOCKER_IMAGE}"
             """
         }
     }
@@ -127,8 +127,8 @@ stage('SonarQube Analysis') {
             )]) {
                 sh """
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push ${TODO_IMAGE}
-                    docker push ${TODO_LATEST}
+                    docker push ${DOCKER_IMAGE}
+                    docker push ${DOCKER_LATEST}
                     docker logout
                 """
             }
@@ -142,7 +142,7 @@ stage('SonarQube Analysis') {
 
                 cp projectdeploy.yml /tmp/all-apps.yml
 
-                sed -i 's|sauravnirala/usermanagement:v1|${TODO_IMAGE}|g' /tmp/all-apps.yml
+                sed -i 's|sauravnirala/usermanagement:v1|${DOCKER_IMAGE}|g' /tmp/all-apps.yml
 
                 kubectl apply -f /tmp/all-apps.yml
                 kubectl rollout restart deployment myuserapp -n ${K8S_NAMESPACE}
