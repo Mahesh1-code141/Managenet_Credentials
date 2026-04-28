@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: userappcont
-          image: sauravnirala/usermanagement:v1
+          image: mahesh2452/usermanagement:latest
           ports:
             - containerPort: 8087
           env:
