@@ -185,6 +185,7 @@ stage('SonarQube Analysis') {
         stage('Deploy Application to EKS') {
             steps {
                 sh '''
+                kubectl apply -f namespace.yml
                 kubectl apply -f projectdeploy.yml
                 '''
             }
@@ -204,7 +205,7 @@ stage('SonarQube Analysis') {
                 script {
                     def url = sh(
                         script: '''
-                        kubectl get svc zomatosvc \
+                        kubectl get svc myuserapp-service \
                         -o jsonpath="{.status.loadBalancer.ingress[0].hostname}{.status.loadBalancer.ingress[0].ip}"
                         ''',
                         returnStdout: true
