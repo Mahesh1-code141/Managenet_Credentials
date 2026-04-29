@@ -195,7 +195,7 @@ stage('SonarQube Analysis') {
             steps {
                 sh '''
                 echo "Waiting for LoadBalancer to be ready..."
-                sleep 60
+                sleep 30
                 '''
             }
         }
