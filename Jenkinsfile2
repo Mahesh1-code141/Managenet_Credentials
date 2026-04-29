@@ -205,7 +205,7 @@ stage('SonarQube Analysis') {
                 script {
                     def url = sh(
                         script: '''
-                        kubectl get svc myuserapp-service \
+                        kubectl get svc myuserapp \
                         -o jsonpath="{.status.loadBalancer.ingress[0].hostname}{.status.loadBalancer.ingress[0].ip}"
                         ''',
                         returnStdout: true
