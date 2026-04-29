@@ -1,4 +1,4 @@
-import pytest Mahesh@
+import pytest
 from unittest.mock import patch
 from app import app, create_user, fetch_user_by_id, remove_user_by_id, show_all_data
 from services.user_service import hash_password
