@@ -223,7 +223,8 @@ stage('SonarQube Analysis') {
         }
     }
 
-   // post {
+   /*
+post {
 
         success {
             emailext(
@@ -259,3 +260,4 @@ ${env.BUILD_URL}
         }
     }
 }
+*/
