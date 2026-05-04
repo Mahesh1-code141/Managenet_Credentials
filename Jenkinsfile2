@@ -53,7 +53,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sq') {
                     script {
-                        def scannerHome = tool 'sonar-scanner'   // ✅ FIXED
+                        def scannerHome = tool 'sq'   // ✅ FIXED
                         sh """
                         ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=3-tier-user-management-app \
