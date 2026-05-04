@@ -221,4 +221,4 @@ stage('SonarQube Analysis') {
                 }
             }
         }
-    }
+}
