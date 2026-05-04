@@ -108,15 +108,18 @@ pipeline {
         }
 
         stage('Run with Docker Compose') {
-            steps {
-                sh '''
-                docker compose down || true
-                docker compose up -d
-                sleep 10
-                docker ps
-                '''
-            }
-        }
+    steps {
+        sh '''
+        export PATH=$PATH:/usr/local/bin
+
+        echo "Stopping old containers..."
+        docker-compose down || true
+
+        echo "Starting new containers..."
+        docker-compose up -d --build
+        '''
+    }
+}
 
         stage('Push to DockerHub') {
             steps {
