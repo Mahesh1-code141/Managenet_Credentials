@@ -1,155 +1,123 @@
 pipeline {
-agent any
+    agent any
 
-environment {
-    DOCKERHUB_USER    = 'mahesh2452'
-    DOCKER_REPO         = 'usermanagement'
-    IMAGE_TAG         = "${env.BUILD_NUMBER}"
-
-    DOCKER_IMAGE        = "${DOCKERHUB_USER}/${DOCKER_REPO}:${IMAGE_TAG}"
-    DOCKER_LATEST       = "${DOCKERHUB_USER}/${DOCKER_REPO}:latest"
-
-    GIT_REPO_URL      = 'https://github.com/Mahesh1-code141/Managenet_Credentials.git'
-    GIT_BRANCH        = 'main'
-
-    K8S_NAMESPACE     = 'mahesh'
-    SONARQUBE_ENV     = 'sq'
-    AWS_REGION = "ap-south-1"
-    CLUSTER_NAME = "mycluster"
-    RECIPIENTS = "maheshbabuya@gmail.com"
-}
-
-stages {
-
-    stage('Checkout') {
-        steps {
-            echo "Cloning ${GIT_REPO_URL} @ ${GIT_BRANCH}"
-            git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
-        }
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
-stage('Install Dependencies') {
-    steps {
-        sh '''
-            if ! command -v pip3 >/dev/null 2>&1; then
-                sudo yum install -y python3-pip || true
-            fi
+    environment {
+        DOCKERHUB_USER = 'mahesh2452'
+        DOCKER_REPO    = 'usermanagement'
+        IMAGE_TAG      = "${BUILD_NUMBER}"
 
-            python3 -m ensurepip --upgrade || true
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements.txt
-        '''
-    }
-}
+        DOCKER_IMAGE  = "${DOCKERHUB_USER}/${DOCKER_REPO}:${IMAGE_TAG}"
+        DOCKER_LATEST = "${DOCKERHUB_USER}/${DOCKER_REPO}:latest"
 
-    stage('Test') {
-        steps {
-            sh """
-               export ENV=test
-               python3 -m pip install pytest pytest-cov
-               python3 -m pytest --cov=app --cov-report=xml:coverage.xml test_app.py
-            """
-        }
+        GIT_REPO_URL = 'https://github.com/Mahesh1-code141/Managenet_Credentials.git'
+        GIT_BRANCH   = 'main'
+
+        K8S_NAMESPACE = 'mahesh'
+        AWS_REGION    = "ap-south-1"
+        CLUSTER_NAME  = "mycluster"
+
+        SONAR_SCANNER = tool 'sonar-scanner'   // ✅ Correct tool name
     }
 
-stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('sq') {
-            script {
-                def scannerHome = tool 'sq'
-                sh """
-                ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=3-tier-user-management-app \
-                -Dsonar.sources=. \
-                -Dsonar.test.inclusions=test_*.py \
-                -Dsonar.exclusions=venv/**,__pycache__/**,.dockerignore \
-                -Dsonar.python.coverage.reportPaths=coverage.xml
-                """
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
             }
         }
-    }
-}
 
-    stage('Quality Gate') {
-        steps {
-            timeout(time: 1, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-            }
-        }
-    }
-
-    stage('Build Artifact') {
-        steps {
-            sh """
-            pip3 install build setuptools wheel twine
-            python3 -m build
-            """
-        }
-    }
-
-    stage('Upload to Nexus') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'nexuscred', passwordVariable: 'passwd', usernameVariable: 'username')]) {
-                sh """
-                python3 -m twine upload --repository-url http://3.110.159.152:8081/repository/python/ \
-                -u $username -p $passwd dist/*
-                """
-            }
-        }
-    }
-
-    stage('Build Docker Images') {
-        steps {
-            sh """
-                docker build --no-cache -t ${DOCKER_IMAGE} -t ${DOCKER_LATEST} -f Dockerfile .
-                echo "Built ${DOCKER_IMAGE}"
-            """
-        }
-    }
-    stage('Run with Docker Compose') {
-        steps {
-            sh """
-                echo "Stopping any existing containers..."
-                docker compose down || true
-    
-                echo "Starting application using docker-compose..."
-                docker compose up -d --build
-    
-                echo "Waiting for app to be healthy..."
-                sleep 10
-    
-                docker ps
-            """
-        }
-    }
-    
-
-    stage('Push to DockerHub') {
-        steps {
-            echo "Logging in to DockerHub as ${DOCKERHUB_USER}..."
-            withCredentials([usernamePassword(
-                credentialsId: 'dockerhub',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PASS'
-            )]) {
-                sh """
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push ${DOCKER_IMAGE}
-                    docker push ${DOCKER_LATEST}
-                    docker logout
-                """
-            }
-        }
-    }
-
-        stage('Install Helm') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                curl -LO https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
-                tar -zxvf helm-v3.14.0-linux-amd64.tar.gz
-                mv linux-amd64/helm ./helm
-                chmod +x ./helm
+                python3 -m pip install --upgrade pip
+                pip3 install -r requirements.txt
                 '''
+            }
+        }
+
+        stage('Test & Coverage') {
+            steps {
+                sh '''
+                pip3 install pytest pytest-cov
+                pytest --cov=app --cov-report=xml:coverage.xml test_app.py
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sq') {
+                    sh """
+                    ${SONAR_SCANNER}/bin/sonar-scanner \
+                    -Dsonar.projectKey=3-tier-user-management-app \
+                    -Dsonar.sources=. \
+                    -Dsonar.python.coverage.reportPaths=coverage.xml
+                    """
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build Artifact') {
+            steps {
+                sh '''
+                pip3 install build
+                python3 -m build
+                '''
+            }
+        }
+
+        stage('Upload to Nexus') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexuscred',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh '''
+                    python3 -m twine upload \
+                    --repository-url http://3.110.159.152:8081/repository/python/ \
+                    -u $USER -p $PASS dist/*
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t $DOCKER_IMAGE -t $DOCKER_LATEST .
+                '''
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push $DOCKER_IMAGE
+                    docker push $DOCKER_LATEST
+                    docker logout
+                    '''
+                }
             }
         }
 
@@ -162,32 +130,20 @@ stage('SonarQube Analysis') {
             }
         }
 
-        stage('Deploy Monitoring (Prometheus + Grafana)') {
+        stage('Deploy Monitoring') {
             steps {
                 sh '''
-                ./helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
-                ./helm repo update
+                helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+                helm repo update
 
-                ./helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+                helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
                 --namespace monitoring --create-namespace \
                 --set grafana.service.type=LoadBalancer
                 '''
             }
         }
 
-        stage('Get Grafana Password') {
-            steps {
-                sh '''
-                echo "Grafana Admin Password:"
-                kubectl get secret monitoring-grafana \
-                -n monitoring \
-                -o jsonpath="{.data.admin-password}" | base64 --decode
-                echo ""
-                '''
-            }
-        }
-
-        stage('Deploy Application to EKS') {
+        stage('Deploy Application') {
             steps {
                 sh '''
                 kubectl apply -f namespace.yml
@@ -196,29 +152,32 @@ stage('SonarQube Analysis') {
             }
         }
 
-        stage('Wait for LoadBalancer') {
-            steps {
-                sh '''
-                echo "Waiting for LoadBalancer to be ready..."
-                sleep 30
-                '''
-            }
-        }
-
-        stage('Get Application URL') {
+        stage('Get App URL') {
             steps {
                 script {
                     def url = sh(
                         script: '''
                         kubectl get svc myuserapp-service -n mahesh \
-                        -o jsonpath="{.status.loadBalancer.ingress[0].hostname}{.status.loadBalancer.ingress[0].ip}"
+                        -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
                         ''',
                         returnStdout: true
                     ).trim()
 
-                    env.APP_URL = url
-                    echo "Application URL: ${env.APP_URL}"
+                    echo "App URL: http://${url}"
                 }
             }
         }
     }
+
+    post {
+        success {
+            echo "Pipeline SUCCESS"
+        }
+        failure {
+            echo "Pipeline FAILED"
+        }
+        always {
+            sh 'docker system prune -f || true'  // ✅ cleanup
+        }
+    }
+}
